@@ -1,12 +1,14 @@
 package main
 
 import (
+	"runtime"
 	"time"
 )
 
 func main() {
 
 	goDur, _ := time.ParseDuration("10ms")
+	runtime.GOMAXPROCS(2)
 
 	go func() {
 		for i := 0; i < 100; i++ {
