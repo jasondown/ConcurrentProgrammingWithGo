@@ -1,12 +1,19 @@
 package main
 
+import (
+	"time"
+)
+
 func main() {
 
-	func() {
+	go func() {
 		println("Hello")
 	}()
 
-	func() {
+	go func() {
 		println("Go")
 	}()
+
+	dur, _ := time.ParseDuration("1s")
+	time.Sleep(dur)
 }
