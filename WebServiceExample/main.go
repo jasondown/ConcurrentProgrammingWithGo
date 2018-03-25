@@ -24,16 +24,26 @@ func main() {
 		"s",
 	}
 
+	numComplete := 0
+
 	for _, symbol := range stockSymbols {
-		resp, _ := http.Get("http://dev.markitondemand.com/MODApis/Api/v2/Quote?symbol=" + symbol)
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
+		go func(symbol string) {
+			resp, _ := http.Get("http://dev.markitondemand.com/MODApis/Api/v2/Quote?symbol=" + symbol)
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
 
-		quote := new(QuoteResponse)
-		xml.Unmarshal(body, &quote)
+			quote := new(QuoteResponse)
+			xml.Unmarshal(body, &quote)
 
-		fmt.Printf("%s: %.2f\n", quote.Name, quote.LastPrice)
+			fmt.Printf("%s: %.2f\n", quote.Name, quote.LastPrice)
+			numComplete++
+		}(symbol)
 	}
+
+	for numComplete < len(stockSymbols) {
+		time.Sleep(10 * time.Millisecond)
+	}
+
 	elapsed := time.Since(start)
 
 	fmt.Printf("Execution time: %s", elapsed)
