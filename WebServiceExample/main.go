@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"runtime"
 	"time"
 )
 
 func main() {
 
+	runtime.GOMAXPROCS(4)
 	start := time.Now()
 
 	stockSymbols := []string{
