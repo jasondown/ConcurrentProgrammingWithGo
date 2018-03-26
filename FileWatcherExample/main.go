@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ import (
 const watchedPath = "./source"
 
 func main() {
+	runtime.GOMAXPROCS(4)
 	for {
 		d, _ := os.Open(watchedPath)
 		files, _ := d.Readdir(-1)
