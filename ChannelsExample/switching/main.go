@@ -18,11 +18,18 @@ func main() {
 		ErrorMessage:    "Message intercepted by black rider",
 		OriginalMessage: Message{},
 	}
+
 	msgCh <- msg
 	errCh <- FailedMessage
 
-	fmt.Println(<-msgCh)
-	fmt.Println(<-errCh)
+	select {
+	case receivedMsg := <-msgCh:
+		fmt.Println(receivedMsg)
+	case receivedError := <-errCh:
+		fmt.Println(receivedError)
+	default:
+		fmt.Println("No messages received")
+	}
 }
 
 type Message struct {
