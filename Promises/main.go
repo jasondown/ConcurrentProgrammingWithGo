@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 		po := obj.(*PurchaseOrder)
 		fmt.Printf("Purchase order save with ID: %d\n", po.Number)
 
-		return errors.New("first promise failed")
+		return nil
 	}, func(err error) {
 		fmt.Printf("Failed to save Purchase Order: " + err.Error() + "\n")
 	}).Then(func(obj interface{}) error {
@@ -38,6 +39,7 @@ func SavePO(po *PurchaseOrder, shouldFail bool) *Promise {
 	result.failureChannel = make(chan error, 1)
 
 	go func() {
+		time.Sleep(2 * time.Second)
 		if shouldFail {
 			result.failureChannel <- errors.New("Failed to save purchase order.")
 		} else {
@@ -60,6 +62,7 @@ func (this *Promise) Then(success func(interface{}) error, failure func(error)) 
 	result.successChannel = make(chan interface{}, 1)
 	result.failureChannel = make(chan error, 1)
 
+	timeout := time.After(1 * time.Second)
 	go func() {
 		select {
 		case obj := <-this.successChannel:
@@ -72,6 +75,8 @@ func (this *Promise) Then(success func(interface{}) error, failure func(error)) 
 		case err := <-this.failureChannel:
 			failure(err)
 			result.failureChannel <- err
+		case <-timeout:
+			failure(errors.New("Promise timed out"))
 		}
 	}()
 
