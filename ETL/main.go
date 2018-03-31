@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync/atomic"
 	"time"
 )
 
@@ -70,11 +71,21 @@ func transform(extractChannel, transformChannel chan *Order) {
 		productList[product.PartNumber] = product
 	}
 
+	numMessages := int64(0)
+
 	for o := range extractChannel {
-		time.Sleep(3 * time.Millisecond)
-		o.UnitCost = productList[o.PartNumber].UnitCost
-		o.UnitPrice = productList[o.PartNumber].UnitPrice
-		transformChannel <- o
+		atomic.AddInt64(&numMessages, 1)
+		go func(o *Order) {
+			time.Sleep(3 * time.Millisecond)
+			o.UnitCost = productList[o.PartNumber].UnitCost
+			o.UnitPrice = productList[o.PartNumber].UnitPrice
+			transformChannel <- o
+			atomic.AddInt64(&numMessages, -1)
+		}(o)
+	}
+
+	for numMessages > 0 {
+		time.Sleep(1 * time.Millisecond)
 	}
 
 	close(transformChannel)
@@ -88,12 +99,22 @@ func load(transformChannel chan *Order, doneChannel chan bool) {
 		"Part Number", "Quantity", "Unit Cost",
 		"Unit Price", "Total Cost", "Total Price")
 
+	numMessages := int64(0)
+
 	for o := range transformChannel {
+		atomic.AddInt64(&numMessages, 1)
+		go func(o *Order) {
+			time.Sleep(1 * time.Millisecond)
+			fmt.Fprintf(f, "%20s %15d %12.2f %12.2f %15.2f %15.2f\n",
+				o.PartNumber, o.Quantity, o.UnitCost, o.UnitCost,
+				o.UnitCost*float64(o.Quantity),
+				o.UnitPrice*float64(o.Quantity))
+			atomic.AddInt64(&numMessages, -1)
+		}(o)
+	}
+
+	for numMessages > 0 {
 		time.Sleep(1 * time.Millisecond)
-		fmt.Fprintf(f, "%20s %15d %12.2f %12.2f %15.2f %15.2f\n",
-			o.PartNumber, o.Quantity, o.UnitCost, o.UnitCost,
-			o.UnitCost*float64(o.Quantity),
-			o.UnitPrice*float64(o.Quantity))
 	}
 
 	doneChannel <- true
