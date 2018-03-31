@@ -1,4 +1,5 @@
-         Part Number       Quantity   Unit Cost  Unit Price     Total Cost    Total Price            76502369               7        12.35        12.35           86.45          115.29
+         Part Number       Quantity   Unit Cost  Unit Price     Total Cost    Total Price
+            76502369               7        12.35        12.35           86.45          115.29
             56886748              18        24.94        24.94          448.92          556.56
             62283911               7        15.50        15.50          108.50          147.77
             40749682              96        14.45        14.45         1387.20         1872.00
