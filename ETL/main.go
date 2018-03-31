@@ -78,7 +78,7 @@ func load(orders []*Order) {
 	f, _ := os.Create("./dest.txt")
 	defer f.Close()
 
-	fmt.Fprintf(f, "%20s%15s%12s%12s%15s%15s",
+	fmt.Fprintf(f, "%20s%15s%12s%12s%15s%15s\n",
 		"Part Number", "Quantity", "Unit Cost",
 		"Unit Price", "Total Cost", "Total Price")
 
